@@ -1,0 +1,151 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Users ────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  displayName  String
+  avatarUrl    String?
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  memberships  GroupMember[]
+  ownedGroups  Group[]       @relation("GroupOwner")
+  votes        Vote[]
+
+  @@map("users")
+}
+
+// ─── Groups ───────────────────────────────────────────────────────────────────
+
+model Group {
+  id          String      @id @default(cuid())
+  name        String
+  inviteCode  String      @unique
+  ownerId     String
+  owner       User        @relation("GroupOwner", fields: [ownerId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  members     GroupMember[]
+  sessions    Session[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  userId    String
+  joinedAt  DateTime @default(now())
+
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@map("group_members")
+}
+
+// ─── Sessions ─────────────────────────────────────────────────────────────────
+
+model Session {
+  id              String        @id @default(cuid())
+  groupId         String
+  latitude        Float
+  longitude       Float
+  radiusMeters    Int           @default(2000)
+  status          SessionStatus @default(LOBBY)
+  winnerPlaceId   String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  completedAt     DateTime?
+
+  group           Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  restaurants     SessionRestaurant[]
+  votes           Vote[]
+
+  @@map("sessions")
+}
+
+enum SessionStatus {
+  LOBBY      // waiting for members to be ready
+  SWIPING    // members actively swiping
+  TALLYING   // votes being counted
+  COMPLETE   // winner determined
+}
+
+// ─── Restaurants (cached from Google Places) ──────────────────────────────────
+
+model Restaurant {
+  id              String   @id @default(cuid())
+  placeId         String   @unique   // Google Places place_id
+  name            String
+  address         String
+  latitude        Float
+  longitude       Float
+  rating          Float?
+  userRatingsTotal Int?
+  priceLevel      Int?               // 0–4 (Google's scale)
+  photoReference  String?            // Google Photos reference
+  photoUrl        String?            // cached resolved URL
+  types           String[]           // ["restaurant", "food", ...]
+  openNow         Boolean?
+  website         String?
+  phoneNumber     String?
+  googleMapsUrl   String?
+  cachedAt        DateTime @default(now())
+
+  sessions        SessionRestaurant[]
+  votes           Vote[]
+
+  @@map("restaurants")
+}
+
+model SessionRestaurant {
+  id           String     @id @default(cuid())
+  sessionId    String
+  restaurantId String
+  ordinal      Int        // display order in the card stack
+  addedAt      DateTime   @default(now())
+
+  session      Session    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@unique([sessionId, restaurantId])
+  @@map("session_restaurants")
+}
+
+// ─── Votes ────────────────────────────────────────────────────────────────────
+
+model Vote {
+  id           String     @id @default(cuid())
+  sessionId    String
+  restaurantId String
+  userId       String
+  direction    VoteDir    // RIGHT = yes, LEFT = no
+  createdAt    DateTime   @default(now())
+
+  session      Session    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@unique([sessionId, restaurantId, userId])
+  @@map("votes")
+}
+
+enum VoteDir {
+  LEFT   // nope
+  RIGHT  // yes!
+}

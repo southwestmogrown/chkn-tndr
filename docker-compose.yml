@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  # ─── PostgreSQL ─────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: chikn_tndr_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: chikn_tndr
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # ─── API server (optional — run locally with `npm run dev` instead) ─────────
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: chikn_tndr_api
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    env_file: ./server/.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/chikn_tndr?schema=public
+    ports:
+      - "4000:4000"
+    profiles:
+      - full # only start with: docker compose --profile full up
+
+  # ─── Client (optional) ──────────────────────────────────────────────────────
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: chikn_tndr_client
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "5173:80"
+    profiles:
+      - full
+
+volumes:
+  postgres_data:
