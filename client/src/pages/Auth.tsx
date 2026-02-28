@@ -48,8 +48,8 @@ export default function AuthPage() {
         animate={{ y: 0, opacity: 1 }}
         className="text-center mb-10"
       >
-        <div className="text-7xl mb-4">🍗</div>
-        <h1 className="font-display font-black text-5xl text-white tracking-tight">
+        <div className="text-5xl sm:text-7xl mb-4">🍗</div>
+        <h1 className="font-display font-black text-4xl sm:text-5xl text-white tracking-tight">
           Chikn Tndr
         </h1>
         <p className="text-gray-400 mt-2 text-base">

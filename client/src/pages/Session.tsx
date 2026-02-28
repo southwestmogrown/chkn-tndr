@@ -124,7 +124,7 @@ export default function SessionPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-1 max-w-sm mx-auto w-full pt-2">
+      <main className="flex-1 max-w-sm mx-auto w-full pt-2 overflow-y-auto">
         <GroupLobby
           session={session}
           readyState={readyState}

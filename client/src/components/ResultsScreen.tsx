@@ -3,7 +3,7 @@
  */
 
 import { motion } from "framer-motion";
-import { MapPin, Star, ExternalLink, Trophy } from "lucide-react";
+import { MapPin, ExternalLink, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { VoteTally } from "../types";
 
@@ -52,7 +52,7 @@ export function ResultsScreen({ winner, tally }: ResultsScreenProps) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="font-display font-black text-4xl text-white text-shadow leading-tight"
+            className="font-display font-black text-3xl sm:text-4xl text-white text-shadow leading-tight"
           >
             {winner.name}
           </motion.h1>
@@ -74,7 +74,7 @@ export function ResultsScreen({ winner, tally }: ResultsScreenProps) {
       </div>
 
       {/* Actions */}
-      <div className="px-5 mt-4 flex gap-3">
+      <div className="px-5 mt-4 flex flex-wrap gap-3">
         {winner.placeId && (
           <a
             href={`https://www.google.com/maps/place/?q=place_id:${winner.placeId}`}

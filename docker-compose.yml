@@ -14,6 +14,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d chikn_tndr"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # ─── API server (optional — run locally with `npm run dev` instead) ─────────
   api:
@@ -23,7 +28,8 @@ services:
     container_name: chikn_tndr_api
     restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     env_file: ./server/.env
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/chikn_tndr?schema=public
@@ -31,6 +37,13 @@ services:
       - "4000:4000"
     profiles:
       - full # only start with: docker compose --profile full up
+    healthcheck:
+      test:
+        ["CMD-SHELL", "wget -qO- http://localhost:4000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # ─── Client (optional) ──────────────────────────────────────────────────────
   client:
@@ -40,7 +53,8 @@ services:
     container_name: chikn_tndr_client
     restart: unless-stopped
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     ports:
       - "5173:80"
     profiles:

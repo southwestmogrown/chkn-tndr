@@ -179,7 +179,7 @@ export default function HomePage() {
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 32, opacity: 0, scale: 0.97 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="glass rounded-3xl p-6 w-full max-w-sm"
+              className="glass rounded-3xl p-6 w-full max-w-sm max-h-[90dvh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Create Group */}

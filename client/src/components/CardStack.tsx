@@ -21,7 +21,7 @@ export function CardStack({ cards, currentIndex, onSwipe }: CardStackProps) {
 
   if (visible.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 h-[480px] text-center px-8">
+      <div className="flex flex-col items-center justify-center gap-4 flex-1 min-h-0 text-center px-8">
         <span className="text-6xl">🎉</span>
         <p className="font-display text-2xl font-bold text-white">
           All done swiping!
@@ -36,7 +36,7 @@ export function CardStack({ cards, currentIndex, onSwipe }: CardStackProps) {
   return (
     <div className="flex flex-col items-center gap-8 w-full">
       {/* Progress */}
-      <div className="w-full max-w-sm px-4">
+      <div className="w-full max-w-sm px-4 shrink-0">
         <div className="flex justify-between text-xs text-gray-500 mb-1">
           <span>{currentIndex} done</span>
           <span>{remaining} left</span>
@@ -50,7 +50,7 @@ export function CardStack({ cards, currentIndex, onSwipe }: CardStackProps) {
       </div>
 
       {/* Card stack */}
-      <div className="relative w-full max-w-sm h-[460px]">
+      <div className="relative w-full max-w-sm h-[460px] overflow-hidden">
         {[...visible].reverse().map((card, reverseIdx) => {
           const stackOffset = VISIBLE_CARDS - 1 - reverseIdx;
           return (
@@ -65,7 +65,7 @@ export function CardStack({ cards, currentIndex, onSwipe }: CardStackProps) {
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-10">
+      <div className="flex items-center gap-10 pt-4">
         <button
           onClick={() => onSwipe("LEFT")}
           className="action-btn-no"
