@@ -171,13 +171,13 @@ export default function HomePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end justify-center p-4 z-50"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50"
             onClick={() => setModal("none")}
           >
             <motion.div
-              initial={{ y: 100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 100, opacity: 0 }}
+              initial={{ y: 32, opacity: 0, scale: 0.97 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 32, opacity: 0, scale: 0.97 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="glass rounded-3xl p-6 w-full max-w-sm"
               onClick={(e) => e.stopPropagation()}
@@ -250,20 +250,20 @@ export default function HomePage() {
                     Use My Location
                   </button>
 
-                  <div className="flex gap-2 mb-4">
+                  <div className="grid grid-cols-2 gap-2 mb-4">
                     <input
                       type="number"
                       placeholder="Latitude"
                       value={lat}
                       onChange={(e) => setLat(e.target.value)}
-                      className="flex-1 bg-white/10 border border-white/10 rounded-xl px-3 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-500 text-sm"
+                      className="w-full min-w-0 bg-white/10 border border-white/10 rounded-xl px-3 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-500 text-sm"
                     />
                     <input
                       type="number"
                       placeholder="Longitude"
                       value={lng}
                       onChange={(e) => setLng(e.target.value)}
-                      className="flex-1 bg-white/10 border border-white/10 rounded-xl px-3 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-500 text-sm"
+                      className="w-full min-w-0 bg-white/10 border border-white/10 rounded-xl px-3 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-500 text-sm"
                     />
                   </div>
 

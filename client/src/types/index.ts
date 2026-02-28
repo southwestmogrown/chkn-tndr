@@ -93,6 +93,29 @@ export interface SessionErrorPayload {
   message: string;
 }
 
+// ─── Socket.io event maps (used by useSocket to type the Socket instance) ─────
+
+export interface ServerToClientEvents {
+  "session:memberJoined": (payload: MemberJoinedPayload) => void;
+  "session:memberLeft": (payload: MemberLeftPayload) => void;
+  "session:memberReady": (payload: MemberReadyPayload) => void;
+  "session:started": (payload: SessionStartedPayload) => void;
+  "session:voteReceived": (payload: VoteReceivedPayload) => void;
+  "session:complete": (payload: SessionCompletePayload) => void;
+  "session:error": (payload: SessionErrorPayload) => void;
+}
+
+export interface ClientToServerEvents {
+  "session:join": (payload: { sessionId: string; token: string }) => void;
+  "session:ready": (payload: { sessionId: string }) => void;
+  "session:vote": (payload: {
+    sessionId: string;
+    restaurantId: string;
+    direction: "LEFT" | "RIGHT";
+  }) => void;
+  "session:leave": (payload: { sessionId: string }) => void;
+}
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 export interface AuthState {

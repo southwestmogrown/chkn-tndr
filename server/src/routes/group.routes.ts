@@ -81,7 +81,9 @@ router.get(
       return;
     }
 
-    const isMember = group.members.some((m) => m.userId === req.user!.userId);
+    const isMember = group.members.some(
+      (m: { userId: string }) => m.userId === req.user!.userId,
+    );
     if (!isMember) {
       res.status(403).json({ error: "You are not a member of this group" });
       return;
@@ -138,11 +140,9 @@ router.delete(
       return;
     }
     if (group.ownerId === userId) {
-      res
-        .status(400)
-        .json({
-          error: "Owner cannot leave. Transfer ownership or delete the group.",
-        });
+      res.status(400).json({
+        error: "Owner cannot leave. Transfer ownership or delete the group.",
+      });
       return;
     }
 

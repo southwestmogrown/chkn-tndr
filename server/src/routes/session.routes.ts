@@ -66,7 +66,7 @@ router.get("/:id", async (req: Request, res: Response): Promise<void> => {
   }
 
   const isGroupMember = session.group.members.some(
-    (m) => m.userId === req.user!.userId,
+    (m: { userId: string }) => m.userId === req.user!.userId,
   );
   if (!isGroupMember) {
     res.status(403).json({ error: "Access denied" });

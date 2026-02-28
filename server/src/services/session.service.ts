@@ -5,7 +5,7 @@
  * Also computes vote tallies and determines the winner.
  */
 
-import { SessionStatus } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../db/prisma";
 import { placesService } from "./places.service";
 import { env } from "../config/env";
@@ -38,27 +38,29 @@ export class SessionService {
     }
 
     // Create the session and link restaurants in one transaction
-    const session = await prisma.$transaction(async (tx) => {
-      const session = await tx.session.create({
-        data: {
-          groupId,
-          latitude,
-          longitude,
-          radiusMeters: radius,
-          status: SessionStatus.LOBBY,
-        },
-      });
+    const session = await prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        const session = await tx.session.create({
+          data: {
+            groupId,
+            latitude,
+            longitude,
+            radiusMeters: radius,
+            status: "LOBBY",
+          },
+        });
 
-      await tx.sessionRestaurant.createMany({
-        data: cards.map((card, idx) => ({
-          sessionId: session.id,
-          restaurantId: card.id,
-          ordinal: idx,
-        })),
-      });
+        await tx.sessionRestaurant.createMany({
+          data: cards.map((card, idx) => ({
+            sessionId: session.id,
+            restaurantId: card.id,
+            ordinal: idx,
+          })),
+        });
 
-      return session;
-    });
+        return session;
+      },
+    );
 
     logger.info("Session created", {
       sessionId: session.id,
@@ -70,7 +72,7 @@ export class SessionService {
   async startSession(sessionId: string) {
     return prisma.session.update({
       where: { id: sessionId },
-      data: { status: SessionStatus.SWIPING },
+      data: { status: "SWIPING" },
     });
   }
 
@@ -79,7 +81,7 @@ export class SessionService {
   ): Promise<{ winner: VoteTally; tally: VoteTally[] }> {
     await prisma.session.update({
       where: { id: sessionId },
-      data: { status: SessionStatus.TALLYING },
+      data: { status: "TALLYING" },
     });
 
     const tally = await this.computeTally(sessionId);
@@ -90,7 +92,7 @@ export class SessionService {
     await prisma.session.update({
       where: { id: sessionId },
       data: {
-        status: SessionStatus.COMPLETE,
+        status: "COMPLETE",
         winnerPlaceId: winner.placeId,
         completedAt: new Date(),
       },
@@ -153,20 +155,25 @@ export class SessionService {
       else entry.no += v._count.direction;
     }
 
-    const tally: VoteTally[] = sessionRestaurants.map((sr) => {
-      const counts = voteMap.get(sr.restaurantId) ?? { yes: 0, no: 0 };
-      return {
-        restaurantId: sr.restaurantId,
-        placeId: sr.restaurant.placeId,
-        name: sr.restaurant.name,
-        photoUrl: sr.restaurant.photoUrl,
-        yesVotes: counts.yes,
-        noVotes: counts.no,
-        totalVoters,
-        percentage:
-          totalVoters > 0 ? Math.round((counts.yes / totalVoters) * 100) : 0,
-      };
-    });
+    const tally: VoteTally[] = sessionRestaurants.map(
+      (sr: {
+        restaurantId: string;
+        restaurant: { placeId: string; name: string; photoUrl: string | null };
+      }) => {
+        const counts = voteMap.get(sr.restaurantId) ?? { yes: 0, no: 0 };
+        return {
+          restaurantId: sr.restaurantId,
+          placeId: sr.restaurant.placeId,
+          name: sr.restaurant.name,
+          photoUrl: sr.restaurant.photoUrl,
+          yesVotes: counts.yes,
+          noVotes: counts.no,
+          totalVoters,
+          percentage:
+            totalVoters > 0 ? Math.round((counts.yes / totalVoters) * 100) : 0,
+        };
+      },
+    );
 
     return tally.sort(
       (a, b) => b.yesVotes - a.yesVotes || b.percentage - a.percentage,
