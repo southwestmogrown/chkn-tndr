@@ -2,6 +2,14 @@
 
 > _Swipe right on dinner. Left on regret._
 
+![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=nodedotjs&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169e1?logo=postgresql&logoColor=white)
+![Socket.io](https://img.shields.io/badge/Socket.io-4-010101?logo=socketdotio&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+
 Chikn Tndr is a real-time, multiplayer "where should we eat?" game that brings Tinder-style swiping to the age-old group dinner dilemma.
 
 Users form a group, each member swipes through local restaurant cards fetched from Google Places, and the restaurant with the most "Yum!" votes wins.
@@ -247,6 +255,60 @@ docker compose up postgres -d
 - [ ] History — past session results per group
 - [ ] OAuth (Google Sign-In)
 - [ ] Share winner card to Instagram Stories
+
+---
+
+## 🏅 Portfolio Highlights
+
+Key engineering decisions worth calling out in interviews and portfolio write-ups:
+
+| Topic | Detail |
+|---|---|
+| **Real-time architecture** | Socket.io rooms scoped per session; in-memory ready-sets track per-session lobby state without polling |
+| **Consistent vote tallying** | `@@unique([sessionId, restaurantId, userId])` constraint at the DB layer prevents double-votes even if a socket event is replayed |
+| **Optimistic UX** | Vote is emitted via socket *and* persisted via REST in parallel; the card advances immediately so latency is invisible to the user |
+| **Google Places caching** | Restaurant rows are upserted on every session so subsequent sessions near the same area reuse cached records, cutting API spend |
+| **Type-safe event bus** | Socket.io is instantiated with four explicit generic type parameters (`ClientToServerEvents`, `ServerToClientEvents`, …), giving full IDE autocomplete on both ends |
+| **Drag physics** | Framer Motion `useMotionValue` + `useTransform` drive the NOPE/YUM badge opacity in sync with the drag offset — zero extra state |
+| **Atomic session lifecycle** | Session progresses through `LOBBY → SWIPING → TALLYING → COMPLETE` as an enum; all transitions happen in a single `sessionService` so business logic is never spread across routes and sockets |
+
+---
+
+## 💡 Portfolio Improvement Suggestions
+
+The following improvements would significantly strengthen this project for recruiters and technical interviewers:
+
+### High Impact
+1. **Add a CI/CD pipeline** — A GitHub Actions workflow that runs lint + build on every PR immediately signals professional habits. Add a badge to the README.
+2. **Add a screenshot / demo GIF** — Recruiters spend ≤10 seconds per project. A single animated GIF showing the swipe UX at the top of the README captures attention instantly.
+3. **Add a live demo** — Deploy the stack to Fly.io, Railway, or Render (they all support Docker Compose). A "Try it live" button in the README dramatically increases engagement.
+4. **Add automated tests** — Even a small Vitest/Jest suite for `sessionService`, `placesService`, and the swipe hook demonstrates quality awareness. Target ≥60% coverage of the business-logic layer.
+
+### Medium Impact
+5. **Add an architecture diagram** — An excalidraw or draw.io SVG committed to `docs/` and embedded in the README replaces 500 words of explanation.
+6. **Add env-var validation** — Validate `server/.env` at startup with Zod so the app fails fast with a clear error instead of a cryptic runtime crash.
+7. **Replace in-memory ready-sets with Redis** — The current `Map<string, Set<string>>` in `session.socket.ts` is lost on server restart and cannot scale horizontally. Mentioning this limitation *and* the Redis upgrade path in the README shows architectural maturity.
+8. **Add an error boundary** — A React `ErrorBoundary` around the session page keeps a single failed component from crashing the whole app.
+
+### Nice to Have
+9. **Seed realistic demo data** — Extend `prisma/seed.ts` with ≥3 demo users, a group, and a completed session so reviewers can explore the app without needing a Google API key.
+10. **Add OpenAPI / Swagger docs** — A `swagger.yaml` or `@swagger-jsdoc` annotations make the API instantly explorable and signal backend thoroughness.
+
+---
+
+## 📚 Wiki
+
+Detailed documentation lives in [`docs/wiki/`](docs/wiki/):
+
+| Page | Description |
+|---|---|
+| [Home](docs/wiki/Home.md) | Project overview and quick navigation |
+| [Architecture](docs/wiki/Architecture.md) | System design, data flow, component map |
+| [API Reference](docs/wiki/API-Reference.md) | Full REST + Socket.io reference with examples |
+| [Development Guide](docs/wiki/Development-Guide.md) | Local setup, environment variables, workflow |
+| [Deployment](docs/wiki/Deployment.md) | Docker Compose and production deployment |
+| [Tech Stack](docs/wiki/Tech-Stack.md) | Technology choices and rationale |
+| [Real-Time Events](docs/wiki/Real-Time-Events.md) | Socket.io event catalogue |
 
 ---
 
